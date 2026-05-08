@@ -32,6 +32,24 @@ def run_vcf(roles):
     run_command("bcftools index output.vcf.gz ")
     run_command(f"bcftools view -R chr20_ILMN_Exome_2.0_Plus_Panel.hg38_padded.bed output.vcf.gz | bcftools view -s {samples_str} | bcftools view -i 'GT[0]=\"RA\" && GT[1]=\"RR\" && GT[2]=\"RR\"' | bcftools filter -i 'QUAL>20' -Ov -o output.cand.vcf ")
 
+"""
+ The user must update the bcftools command according to the family inheritance model being analysed in the following manner: 
+
+\begin{pysnippet}
+\begin{lstlisting}
+- AR  -->    run_command(f"bcftools view -R chr20_ILMN_Exome_2.0_Plus_Panel.hg38_padded.bed output.vcf.gz | bcftools view -s {samples_str} | bcftools view -i 'GT[0]=\"AA\" && GT[1]=\"RA\" && GT[2]=\"RA\"' | bcftools filter -i 'QUAL>20' -Ov -o output.cand.vcf 
+
+- AD inherited, father affected --> run_command(f"bcftools view -R chr20_ILMN_Exome_2.0_Plus_Panel.hg38_padded.bed output.vcf.gz | bcftools view -s {samples_str} | bcftools view -i 'GT[0]=\"RA\" && GT[1]=\"RA\" && GT[2]=\"RR\"' | bcftools filter -i 'QUAL>20' -Ov -o output.cand.vcf 
+
+- AD de novo --> run_command(f"bcftools view -R chr20_ILMN_Exome_2.0_Plus_Panel.hg38_padded.bed output.vcf.gz | bcftools view -s {samples_str} | bcftools view -i 'GT[0]=\"RA\" && GT[1]=\"RR\" && GT[2]=\"RR\"' | bcftools filter -i 'QUAL>20' -Ov -o output.cand.vcf 
+\end{lstlisting}
+\end{pysnippet}
+
+This is due to the need to specify the reference allele (R) and the alternative one (A) among the different inheritance modes between the child (GT[0]), the father (GT[1]) and mother(GT[2]). In autosomal recessive inheritance both the mother and father have a reference allele and an alternative one, the child to be affected is expected to show a pair of recessive alternative alleles (AA). In the AD inherited model, a parent must have the alternative allele and consequently show the disease symptoms. In this example we considered the father to be affected, as GT[1] shows an alternative allele. In the AD de novo inheritance mode the mutation occured only in the child, so he is the only carrier of an alternative allele, therefore he is the only one affected by the disease.
+
+"""
+
+
 def run_command(cmd):
     try:
         print(f"Running: {cmd}")
