@@ -1,5 +1,4 @@
 import subprocess
-import os
 
 def setup_links(trio_id):
     run_command(f"ln -s /home/BCG2026_exam/BCG2026_Cenedese_A/{trio_id}/* . ") #e importo i file fw e rev mamma papà figlio
@@ -8,7 +7,7 @@ def setup_links(trio_id):
     run_command("ls")
 
 # multiqc and bowtie
-def run_variant_calling(samples, roles):
+def run_alignment(samples, roles):
     print("Running variant calling...")
     for i in range (0,len(samples)):
         cmd = f"bowtie2 -x chr20 -1 {samples[i]}.targets_R1.fq.gz -2 {samples[i]}.targets_R2.fq.gz --rg-id {samples[i]} --rg SM:{roles[i]} | samtools view -Sb - | samtools sort -o {roles[i]}.bam"
@@ -26,7 +25,7 @@ def run_qc(roles):
 
 # variant calling -> vcf
 def run_vcf(roles):
-    samples_str = ",".join(roles)We
+    samples_str = ",".join(roles)
     print("Avvio MultiVCF...")
     run_command("nohup freebayes -f chr20.fa -m 20 -C 5 -Q 10 -q 10 --min-coverage 10 child.bam father.bam mother.bam > output.vcf ")
     run_command("bgzip output.vcf ")
@@ -46,6 +45,6 @@ if __name__ == "__main__":
     setup_links("trio_3") #You will change here according to your samples
     samples = ["HG00421","HG00422","HG00423"] ##You will change here according to your samples
     roles = ["child", "father", "mother"]
-    run_variant_calling(samples, roles)
+    run_alignment(samples, roles)
     run_qc(roles)
     run_vcf(roles)
